@@ -10,26 +10,28 @@ const upload = multer({
 });
 
 router.post(
-  "/",
+  "/add",
   authUserMiddleware,
   upload.single("file"),
   productController.createproduct
 );
 
 router.put(
-  "/:productId",
+  "/edit/:productId",
   authUserMiddleware,
   upload.single("file"),
   productController.updateproduct
 );
 
 router.delete(
-  "/:productId",
+  "/delete/:productId",
   authUserMiddleware,
   productController.deleteproduct
 );
 
 router.get("/", productController.getproductItems);
+
+router.get("/my-products", authUserMiddleware, productController.getMyProducts);
 
 
 module.exports = router;

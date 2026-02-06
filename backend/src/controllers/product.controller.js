@@ -22,6 +22,7 @@ async function createproduct(req, res) {
       price: req.body.price,
       featured: req.body.featured,
       rating: req.body.rating,
+        productOwner: req.user._id,
       ...imageData
     });
 
@@ -38,8 +39,13 @@ async function createproduct(req, res) {
 
 async function updateproduct(req, res) {
   try {
-    const { productId } = req.params;
+  const { productId } = req.params;
     const product = await productModel.findOne({ productId });
+
+    if (req.user._id.toString() !== product.productOwner.toString()) {
+      return res.status(403).json({ message: "you can not update this product" });
+    }
+
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -78,6 +84,11 @@ async function deleteproduct(req, res) {
   try {
     const { productId } = req.params;
     const product = await productModel.findOne({ productId });
+
+    if (req.user._id.toString() !== product.productOwner.toString()) {
+      return res.status(403).json({ message: "you can not delete this product" });
+    }
+
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -124,7 +135,17 @@ async function getproductItems(req, res) {
   }
 }
 
-
+async function getMyProducts(req, res) {
+  try {
+    const products = await productModel.find({ ownerId: req.user.userId });
+    res.status(200).json({
+      count: products.length,
+      products
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
 
 
 module.exports = {
@@ -132,4 +153,5 @@ module.exports = {
   updateproduct,
   deleteproduct,
   getproductItems,
+  getMyProducts
 };
